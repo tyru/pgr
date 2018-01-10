@@ -3,16 +3,29 @@ package pgr
 import (
 	"context"
 	"os"
+	"sync"
 	"time"
 )
 
 type Poller struct {
 	duration time.Duration
 	bars     []*Bar
+
+	mu sync.RWMutex
 }
 
-func NewPoller(d time.Duration, bars ...*Bar) *Poller {
-	return &Poller{duration: d, bars: bars}
+func NewPoller(d time.Duration) *Poller {
+	return &Poller{duration: d}
+}
+
+func (p *Poller) Add(bars ...*Bar) *Poller {
+	if len(bars) == 0 {
+		return p
+	}
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.bars = append(p.bars, bars...)
+	return p
 }
 
 func (p *Poller) Show(ctx context.Context) {
