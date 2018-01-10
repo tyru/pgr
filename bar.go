@@ -23,6 +23,7 @@ func (p *Bar) Name() string {
 	return p.name
 }
 
+// template MUST NOT print newline.
 func (p *Bar) SetTemplate(template *template.Template) *Bar {
 	p.template = template
 	return p
@@ -60,11 +61,12 @@ func (p *Bar) Add(n int64) {
 	atomic.AddInt64(&p.current, n)
 }
 
+// template MUST NOT print newline.
 func NewBarTemplate() *template.Template {
 	return template.New("pgr.Poller").Funcs(funcMaps)
 }
 
-var DefaultTemplate = template.Must(NewBarTemplate().Parse(`({{ name . }}) {{ current . }}/{{ total . }}{{ println }}`))
+var DefaultTemplate = template.Must(NewBarTemplate().Parse(`({{ name . }}) {{ current . }}/{{ total . }}`))
 
 var funcMaps = template.FuncMap{
 	"name": func(value interface{}, args ...string) string {

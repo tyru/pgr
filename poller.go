@@ -60,6 +60,9 @@ func (p *Poller) poll() (err error) {
 		if err := p.bars[i].template.Execute(os.Stdout, p.bars[i]); err != nil {
 			return err
 		}
+		if _, err := os.Stdout.Write([]byte{byte('\n')}); err != nil {
+			return err
+		}
 		if p.bars[i].Current() < p.bars[i].Total() {
 			err = errUnfinished
 		}

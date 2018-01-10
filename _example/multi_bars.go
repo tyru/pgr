@@ -4,18 +4,14 @@ package main
 
 import (
 	"context"
+	"text/template"
 	"time"
 
 	"github.com/tyru/pgr"
 )
 
 func main() {
-	tmpl, err := pgr.NewBarTemplate().Parse(`<<<{{ name . }}>>> {{ current . }}/{{ total . }}{{ println }}`)
-	if err != nil {
-		panic(err)
-	}
-
-	p1 := pgr.NewBar("p1").SetTemplate(tmpl)
+	p1 := pgr.NewBar("p1").SetTemplate(template.Must(pgr.NewBarTemplate().Parse(`<<<{{ name . }}>>> {{ current . }}/{{ total . }}`)))
 	p2 := pgr.NewBar("p2").SetTotal(200)
 	p3 := pgr.NewBar("p3")
 	go incBy(p1, 30*time.Millisecond)
