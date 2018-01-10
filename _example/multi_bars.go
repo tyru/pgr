@@ -22,11 +22,11 @@ func main() {
 	go incBy(p2, 20*time.Millisecond)
 	go incBy(p3, 40*time.Millisecond)
 
-	poll := pgr.NewPoller(100 * time.Millisecond)
+	poller := pgr.NewPoller(100*time.Millisecond, p1, p2, p3)
 	ctx := context.Background()
 	// ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
 	// defer cancel()
-	poll.Show(ctx, p1, p2, p3)
+	poller.Show(ctx)
 }
 
 func incBy(p *pgr.Bar, d time.Duration) {

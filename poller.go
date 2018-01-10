@@ -6,36 +6,38 @@ import (
 	"time"
 )
 
-type Poller time.Duration
-
-func NewPoller(d time.Duration) *Poller {
-	p := Poller(d)
-	return &p
+type Poller struct {
+	duration time.Duration
+	bars     []*Bar
 }
 
-func (poll *Poller) Show(ctx context.Context, bars ...*Bar) {
+func NewPoller(d time.Duration, bars ...*Bar) *Poller {
+	return &Poller{duration: d, bars: bars}
+}
+
+func (p *Poller) Show(ctx context.Context) {
 	termSave()
-	tick := time.NewTicker(time.Duration(*poll)).C
+	tick := time.NewTicker(p.duration).C
 	for {
 		select {
 		case <-ctx.Done():
 			return
 		case <-tick:
 			termRestore()
-			if poll.poll(bars) {
+			if p.poll() {
 				return
 			}
 		}
 	}
 }
 
-func (poll *Poller) poll(bars []*Bar) bool {
-	done := true
-	for i := range bars {
-		bars[i].template.Execute(os.Stdout, bars[i])
-		if bars[i].Current() < bars[i].Total() {
-			done = false
+func (p *Poller) poll() bool {
+	doneAll := true
+	for i := range p.bars {
+		p.bars[i].template.Execute(os.Stdout, p.bars[i])
+		if p.bars[i].Current() < p.bars[i].Total() {
+			doneAll = false
 		}
 	}
-	return done
+	return doneAll
 }
