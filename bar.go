@@ -60,9 +60,11 @@ func (p *Bar) Add(n int64) {
 	atomic.AddInt64(&p.current, n)
 }
 
-var BarTemplate = template.New("pgr.Poller").Funcs(funcMaps)
+func NewBarTemplate() *template.Template {
+	return template.New("pgr.Poller").Funcs(funcMaps)
+}
 
-var DefaultTemplate = template.Must(BarTemplate.Parse(`({{ name . }}) {{ current . }}/{{ total . }}{{ println }}`))
+var DefaultTemplate = template.Must(NewBarTemplate().Parse(`({{ name . }}) {{ current . }}/{{ total . }}{{ println }}`))
 
 var funcMaps = template.FuncMap{
 	"name": func(value interface{}, args ...string) string {

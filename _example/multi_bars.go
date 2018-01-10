@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	tmpl, err := pgr.BarTemplate.Parse(`<<<{{ name . }}>>> {{ current . }}/{{ total . }}{{ println }}`)
+	tmpl, err := pgr.NewBarTemplate().Parse(`<<<{{ name . }}>>> {{ current . }}/{{ total . }}{{ println }}`)
 	if err != nil {
 		panic(err)
 	}
