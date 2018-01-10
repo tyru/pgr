@@ -15,8 +15,8 @@ type Bar struct {
 	template *template.Template
 }
 
-func NewBar(name string) *Bar {
-	return &Bar{current: 0, total: 100, name: name, template: DefaultTemplate}
+func NewBar(name string, total int64) *Bar {
+	return &Bar{name: name, current: 0, total: total, template: DefaultTemplate}
 }
 
 func (p *Bar) Name() string {

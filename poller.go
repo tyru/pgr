@@ -33,12 +33,11 @@ var ErrCanceled = errors.New("canceled by context")
 
 func (p *Poller) Show(ctx context.Context) error {
 	termSave()
-	tick := time.NewTicker(p.duration).C
 	for {
 		select {
 		case <-ctx.Done():
 			return ErrCanceled
-		case <-tick:
+		case <-time.NewTimer(p.duration).C:
 			termRestore()
 			if err := p.poll(); err == nil {
 				return nil
@@ -69,4 +68,11 @@ func (p *Poller) poll() (err error) {
 		}
 	}
 	return err
+}
+
+func (p *Poller) SetDuration(d time.Duration) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	p.duration = d
 }

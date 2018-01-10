@@ -4,6 +4,7 @@ package main
 
 import (
 	"context"
+	"math"
 	"strings"
 	"text/template"
 	"time"
@@ -12,25 +13,35 @@ import (
 )
 
 func main() {
-	p1 := pgr.NewBar("p1").SetTemplate(hasiruTemplate())
-	p2 := pgr.NewBar("p2").SetTotal(200)
-	p3 := pgr.NewBar("p3")
-	go incBy(p1, 30*time.Millisecond)
-	go incBy(p2, 20*time.Millisecond)
-	go incBy(p3, 40*time.Millisecond)
+	b1 := pgr.NewBar("b1", math.MaxInt64).SetTemplate(hasiruTemplate())
+	b2 := pgr.NewBar("b2", math.MaxInt64)
+	b3 := pgr.NewBar("b3", math.MaxInt64)
+	go incBy(b1, 30*time.Millisecond)
+	go incBy(b2, 20*time.Millisecond)
+	go incBy(b3, 40*time.Millisecond)
 
-	poller := pgr.NewPoller(100 * time.Millisecond).Add(p1)
+	poller := pgr.NewPoller(100 * time.Millisecond).Add(b1)
+
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
 
 	go func() {
-		time.Sleep(1 * time.Second)
-		poller.Add(p2)
-		time.Sleep(1 * time.Second)
-		poller.Add(p3)
-	}()
+		// Add new progress bar (b2)
+		time.Sleep(2 * time.Second)
+		poller.Add(b2)
 
-	ctx := context.Background()
-	// ctx, cancel := context.WithTimeout(ctx, 1*time.Second)
-	// defer cancel()
+		// Add new progress bar (b3)
+		time.Sleep(2 * time.Second)
+		poller.Add(b3)
+
+		// Speed up 10x faster
+		time.Sleep(2 * time.Second)
+		poller.SetDuration(10 * time.Millisecond)
+
+		// end
+		time.Sleep(2 * time.Second)
+		cancel()
+	}()
 
 	poller.Show(ctx)
 }
