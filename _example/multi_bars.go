@@ -3,6 +3,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"math"
 	"strings"
@@ -14,7 +15,7 @@ import (
 
 func main() {
 	b1 := pgr.NewBar(math.MaxInt64, hasiruTemplate())
-	b2 := pgr.NewBar(math.MaxInt64, parseTemplate(`(b2) {{ current . }}/{{ total . }}`))
+	b2 := pgr.NewBar(math.MaxInt64, uwaaaaTemplate())
 	b3 := pgr.NewBar(math.MaxInt64, parseTemplate(`(b3) {{ current . }}/{{ total . }}`))
 	go incBy(b1, 30*time.Millisecond)
 	go incBy(b2, 20*time.Millisecond)
@@ -80,6 +81,45 @@ func hasiruTemplate() *template.Template {
 	return template.Must(t.Parse(`{{ hasiru }}`))
 }
 
+func uwaaaaTemplate() *template.Template {
+	t := pgr.NewBarTemplate().Funcs(template.FuncMap{
+		"uwaaaa": func() func() string {
+			start := 0
+			const b1 = "▂"
+			const b2 = "▅"
+			const b3 = "▇"
+			const b4 = "▇"
+			const b5 = "▓"
+			const b6 = "▒"
+			const b7 = "░"
+			wave := []string{b1, b2, b3, b4, b5, b6, b7, b6, b5, b4, b3, b2}
+			const face = " ('ω')"
+			return func() string {
+				var buf bytes.Buffer
+
+				// wave 1
+				j := start
+				for i := 0; i < len(wave); i++ {
+					buf.WriteString(wave[j])
+					j = (j + 1) % len(wave)
+				}
+
+				buf.WriteString(face)
+
+				// wave 2: reverse of wave 1
+				j = start
+				for i := 0; i < len(wave); i++ {
+					buf.WriteString(wave[len(wave)-1-j])
+					j = (j + 1) % len(wave)
+				}
+
+				start = (start + 1) % len(wave)
+				return buf.String()
+			}
+		}(),
+	})
+	return template.Must(t.Parse(`{{ uwaaaa }}`))
+}
 
 func parseTemplate(format string) *template.Template {
 	return template.Must(pgr.NewBarTemplate().Parse(format))
