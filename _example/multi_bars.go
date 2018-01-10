@@ -13,9 +13,9 @@ import (
 )
 
 func main() {
-	b1 := pgr.NewBar("b1", math.MaxInt64).SetTemplate(hasiruTemplate())
-	b2 := pgr.NewBar("b2", math.MaxInt64)
-	b3 := pgr.NewBar("b3", math.MaxInt64)
+	b1 := pgr.NewBar(math.MaxInt64, hasiruTemplate())
+	b2 := pgr.NewBar(math.MaxInt64, parseTemplate(`(b2) {{ current . }}/{{ total . }}`))
+	b3 := pgr.NewBar(math.MaxInt64, parseTemplate(`(b3) {{ current . }}/{{ total . }}`))
 	go incBy(b1, 30*time.Millisecond)
 	go incBy(b2, 20*time.Millisecond)
 	go incBy(b3, 40*time.Millisecond)
@@ -78,6 +78,11 @@ func hasiruTemplate() *template.Template {
 		}(),
 	})
 	return template.Must(t.Parse(`{{ hasiru }}`))
+}
+
+
+func parseTemplate(format string) *template.Template {
+	return template.Must(pgr.NewBarTemplate().Parse(format))
 }
 
 func incBy(p *pgr.Bar, d time.Duration) {

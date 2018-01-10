@@ -9,23 +9,18 @@ import (
 type Bar struct {
 	// current must be first member of struct
 	// (https://code.google.com/p/go/issues/detail?id=5278)
-	current  int64
-	total    int64
-	name     string
-	template *template.Template
+	current int64
+	total   int64
+	tmpl    *template.Template
 }
 
-func NewBar(name string, total int64) *Bar {
-	return &Bar{name: name, current: 0, total: total, template: DefaultTemplate}
-}
-
-func (p *Bar) Name() string {
-	return p.name
+func NewBar(total int64, tmpl *template.Template) *Bar {
+	return &Bar{current: 0, total: total, tmpl: tmpl}
 }
 
 // template MUST NOT print newline.
-func (p *Bar) SetTemplate(template *template.Template) *Bar {
-	p.template = template
+func (p *Bar) SetTemplate(tmpl *template.Template) *Bar {
+	p.tmpl = tmpl
 	return p
 }
 
@@ -66,15 +61,7 @@ func NewBarTemplate() *template.Template {
 	return template.New("pgr.Poller").Funcs(funcMaps)
 }
 
-var DefaultTemplate = template.Must(NewBarTemplate().Parse(`({{ name . }}) {{ current . }}/{{ total . }}`))
-
 var funcMaps = template.FuncMap{
-	"name": func(value interface{}, args ...string) string {
-		if bar, ok := value.(*Bar); ok {
-			return bar.Name()
-		}
-		return ""
-	},
 	"current": func(value interface{}, args ...string) string {
 		if bar, ok := value.(*Bar); ok {
 			return strconv.FormatInt(bar.Current(), 10)

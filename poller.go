@@ -57,7 +57,7 @@ func (p *Poller) poll() (err error) {
 
 	for i := range p.bars {
 		termClearLine()
-		if err := p.bars[i].template.Execute(os.Stdout, p.bars[i]); err != nil {
+		if err := p.bars[i].tmpl.Execute(os.Stdout, p.bars[i]); err != nil {
 			return err
 		}
 		if _, err := os.Stdout.Write([]byte{byte('\n')}); err != nil {
