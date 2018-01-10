@@ -9,3 +9,7 @@ func termSave() {
 func termRestore() {
 	fmt.Print("\x1b8")
 }
+
+func termClearLine() {
+	fmt.Print("\x1b\x5b2K")
+}

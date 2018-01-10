@@ -57,6 +57,7 @@ func (p *Poller) poll() (err error) {
 	defer p.mu.Unlock()
 
 	for i := range p.bars {
+		termClearLine()
 		if err := p.bars[i].template.Execute(os.Stdout, p.bars[i]); err != nil {
 			return err
 		}
