@@ -4,6 +4,7 @@ package main
 
 import (
 	"context"
+	"strings"
 	"text/template"
 	"time"
 
@@ -11,7 +12,7 @@ import (
 )
 
 func main() {
-	p1 := pgr.NewBar("p1").SetTemplate(template.Must(pgr.NewBarTemplate().Parse(`<<<{{ name . }}>>> {{ current . }}/{{ total . }}`)))
+	p1 := pgr.NewBar("p1").SetTemplate(hasiruTemplate())
 	p2 := pgr.NewBar("p2").SetTotal(200)
 	p3 := pgr.NewBar("p3")
 	go incBy(p1, 30*time.Millisecond)
@@ -32,6 +33,40 @@ func main() {
 	// defer cancel()
 
 	poller.Show(ctx)
+}
+
+func hasiruTemplate() *template.Template {
+	t := pgr.NewBarTemplate().Funcs(template.FuncMap{
+		"hasiru": func() func() string {
+			forward := true
+			dash := 0
+			const maxDash = 10
+			return func() string {
+				var aa string
+				if forward {
+					if dash == 0 {
+						aa = "┏( ^o^)┛"
+					} else {
+						aa = strings.Repeat("　", dash-1) + "三┏( ^o^)┛"
+					}
+				} else {
+					if dash == 0 {
+						aa = strings.Repeat("　", maxDash) + "┗(^o^ )┓"
+					} else {
+						aa = strings.Repeat("　", maxDash-dash) + "┗(^o^ )┓三"
+					}
+				}
+				if dash >= maxDash {
+					forward = !forward
+					dash = 0
+				} else {
+					dash++
+				}
+				return aa
+			}
+		}(),
+	})
+	return template.Must(t.Parse(`{{ hasiru }}`))
 }
 
 func incBy(p *pgr.Bar, d time.Duration) {
