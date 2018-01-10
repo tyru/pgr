@@ -1,15 +1,18 @@
 package pgr
 
-import "fmt"
+import (
+	"fmt"
+	"io"
+)
 
-func termSave() {
-	fmt.Print("\x1b7")
+func termSave(out io.Writer) {
+	fmt.Fprint(out, "\x1b7")
 }
 
-func termRestore() {
-	fmt.Print("\x1b8")
+func termRestore(out io.Writer) {
+	fmt.Fprint(out, "\x1b8")
 }
 
-func termClearLine() {
-	fmt.Print("\x1b\x5b2K")
+func termClearLine(out io.Writer) {
+	fmt.Fprint(out, "\x1b\x5b2K")
 }
