@@ -83,8 +83,16 @@ func (p *Poller) poll() (err error) {
 
 	for _, bar := range p.bars {
 		termClearLine(p.out)
-		if err := bar.tmpl.Execute(p.out, bar); err != nil {
-			return err
+		if bar.tmpl != nil {
+			if err := bar.tmpl.Execute(p.out, bar); err != nil {
+				return err
+			}
+		} else /* if bar.format != nil */ {
+			if s := bar.format(bar); s != "" {
+				if _, err := p.out.Write([]byte(s)); err != nil {
+					return err
+				}
+			}
 		}
 		if _, err := p.out.Write([]byte{byte('\n')}); err != nil {
 			return err

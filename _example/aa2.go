@@ -14,8 +14,8 @@ import (
 )
 
 func main() {
-	b1 := pgr.NewBar(math.MaxInt64, hasiruTemplate())
-	b2 := pgr.NewBar(math.MaxInt64, uwaaaaTemplate())
+	b1 := pgr.NewBarFunc(math.MaxInt64, dash())
+	b2 := pgr.NewBarFunc(math.MaxInt64, uwaaaa())
 	b3 := pgr.NewBar(math.MaxInt64, parseTemplate(`(b3) {{ current . }}/{{ total . }}`))
 	go incBy(b1, 30*time.Millisecond)
 	go incBy(b2, 20*time.Millisecond)
@@ -47,78 +47,68 @@ func main() {
 	poller.Show(ctx)
 }
 
-func hasiruTemplate() *template.Template {
-	t := pgr.NewBarTemplate().Funcs(template.FuncMap{
-		"hasiru": func() func() string {
-			forward := true
-			dash := 0
-			const maxDash = 10
-			return func() string {
-				var aa string
-				if forward {
-					if dash == 0 {
-						aa = "┏( ^o^)┛"
-					} else {
-						aa = strings.Repeat("　", dash-1) + "三┏( ^o^)┛"
-					}
-				} else {
-					if dash == 0 {
-						aa = strings.Repeat("　", maxDash) + "┗(^o^ )┓"
-					} else {
-						aa = strings.Repeat("　", maxDash-dash) + "┗(^o^ )┓三"
-					}
-				}
-				if dash >= maxDash {
-					forward = !forward
-					dash = 0
-				} else {
-					dash++
-				}
-				return aa
+func dash() pgr.FormatFunc {
+	forward := true
+	dash := 0
+	const maxDash = 20
+	return func(*pgr.Bar) string {
+		var aa string
+		if forward {
+			if dash == 0 {
+				aa = "┏( ^o^)┛"
+			} else {
+				aa = strings.Repeat("　", dash-1) + "三┏( ^o^)┛"
 			}
-		}(),
-	})
-	return template.Must(t.Parse(`{{ hasiru }}`))
+		} else {
+			if dash == 0 {
+				aa = strings.Repeat("　", maxDash) + "┗(^o^ )┓"
+			} else {
+				aa = strings.Repeat("　", maxDash-dash) + "┗(^o^ )┓三"
+			}
+		}
+		if dash >= maxDash {
+			forward = !forward
+			dash = 0
+		} else {
+			dash++
+		}
+		return aa
+	}
 }
 
-func uwaaaaTemplate() *template.Template {
-	t := pgr.NewBarTemplate().Funcs(template.FuncMap{
-		"uwaaaa": func() func() string {
-			start := 0
-			const b1 = "▂"
-			const b2 = "▅"
-			const b3 = "▇"
-			const b4 = "▇"
-			const b5 = "▓"
-			const b6 = "▒"
-			const b7 = "░"
-			wave := []string{b1, b2, b3, b4, b5, b6, b7, b6, b5, b4, b3, b2}
-			const face = " ('ω')"
-			return func() string {
-				var buf bytes.Buffer
+func uwaaaa() pgr.FormatFunc {
+	start := 0
+	const b1 = "▂"
+	const b2 = "▅"
+	const b3 = "▇"
+	const b4 = "▇"
+	const b5 = "▓"
+	const b6 = "▒"
+	const b7 = "░"
+	wave := []string{b1, b2, b3, b4, b5, b6, b7, b6, b5, b4, b3, b2}
+	const face = " ('ω')"
+	return func(*pgr.Bar) string {
+		var buf bytes.Buffer
 
-				// wave 1
-				j := start
-				for i := 0; i < len(wave); i++ {
-					buf.WriteString(wave[j])
-					j = (j + 1) % len(wave)
-				}
+		// wave 1
+		j := start
+		for i := 0; i < len(wave); i++ {
+			buf.WriteString(wave[j])
+			j = (j + 1) % len(wave)
+		}
 
-				buf.WriteString(face)
+		buf.WriteString(face)
 
-				// wave 2: reverse of wave 1
-				j = start
-				for i := 0; i < len(wave); i++ {
-					buf.WriteString(wave[len(wave)-1-j])
-					j = (j + 1) % len(wave)
-				}
+		// wave 2: reverse of wave 1
+		j = start
+		for i := 0; i < len(wave); i++ {
+			buf.WriteString(wave[len(wave)-1-j])
+			j = (j + 1) % len(wave)
+		}
 
-				start = (start + 1) % len(wave)
-				return buf.String()
-			}
-		}(),
-	})
-	return template.Must(t.Parse(`{{ uwaaaa }}`))
+		start = (start + 1) % len(wave)
+		return buf.String()
+	}
 }
 
 func parseTemplate(format string) *template.Template {

@@ -13,10 +13,17 @@ type Bar struct {
 	current int64
 	total   int64
 	tmpl    *template.Template
+	format  FormatFunc
 }
+
+type FormatFunc func(*Bar) string
 
 func NewBar(total int64, tmpl *template.Template) *Bar {
 	return &Bar{current: 0, total: total, tmpl: tmpl}
+}
+
+func NewBarFunc(total int64, format FormatFunc) *Bar {
+	return &Bar{current: 0, total: total, format: format}
 }
 
 // template MUST NOT print newline.
