@@ -11,22 +11,23 @@ import (
 )
 
 func main() {
-	b1 := pgr.NewBar(100, parseTemplate(`(b1) {{ current . }}/{{ total . }}`))
-	b2 := pgr.NewBar(200, parseTemplate(`(b2) {{ current . }}/{{ total . }}`))
-	b3 := pgr.NewBar(100, parseTemplate(`(b3) {{ current . }}/{{ total . }}`))
-	go incBy(b1, 30*time.Millisecond)
-	go incBy(b2, 20*time.Millisecond)
-	go incBy(b3, 40*time.Millisecond)
+	b1 := pgr.NewBar(100, parseTemplate(`(b1) {{ current . }}/{{ total . }} {{ bar . "[" "=" ">" " " "]" 70 }}`))
+	b2 := pgr.NewBar(200, parseTemplate(`(b2) {{ current . }}/{{ total . }} {{ bar . "[" "=" ">" " " "]" 70 }}`))
+	b3 := pgr.NewBar(300, parseTemplate(`(b3) {{ current . }}/{{ total . }} {{ bar . "[" "=" ">" " " "]" 70 }}`))
 
 	poller := pgr.NewPoller(100 * time.Millisecond).Add(b1)
 
 	go func() {
+		go incBy(b1, 30*time.Millisecond)
+
 		// Add new progress bar (b2)
 		time.Sleep(1 * time.Second)
+		go incBy(b2, 20*time.Millisecond)
 		poller.Add(b2)
 
 		// Add new progress bar (b3)
 		time.Sleep(1 * time.Second)
+		go incBy(b3, 10*time.Millisecond)
 		poller.Add(b3)
 	}()
 
