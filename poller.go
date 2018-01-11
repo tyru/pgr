@@ -81,15 +81,15 @@ func (p *Poller) poll() (err error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
-	for i := range p.bars {
+	for _, bar := range p.bars {
 		termClearLine(p.out)
-		if err := p.bars[i].tmpl.Execute(p.out, p.bars[i]); err != nil {
+		if err := bar.tmpl.Execute(p.out, bar); err != nil {
 			return err
 		}
 		if _, err := p.out.Write([]byte{byte('\n')}); err != nil {
 			return err
 		}
-		if p.bars[i].Current() < p.bars[i].Total() {
+		if bar.Current() < bar.Total() {
 			err = errUnfinished
 		}
 	}
