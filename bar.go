@@ -115,3 +115,6 @@ var funcMaps = template.FuncMap{
 		return ""
 	},
 }
+
+// `{{ percent . }} {{ bar . "[" "=" ">" " " "]" }}`
+var DefaultTemplate = template.Must(NewBarTemplate().Parse(`{{ percent . }} {{ bar . "[" "=" ">" " " "]" }}`))
