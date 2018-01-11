@@ -65,7 +65,7 @@ func (p *Bar) Add(n int64) {
 }
 
 // template MUST NOT print newline.
-func NewBarTemplate() *template.Template {
+func NewTemplate() *template.Template {
 	return template.New("pgr.Poller").Funcs(funcMaps)
 }
 
@@ -124,4 +124,4 @@ var funcMaps = template.FuncMap{
 }
 
 // `{{ percent . }} {{ bar . "[" "=" ">" " " "]" }}`
-var DefaultTemplate = template.Must(NewBarTemplate().Parse(`{{ percent . }} {{ bar . "[" "=" ">" " " "]" }}`))
+var DefaultTemplate = template.Must(NewTemplate().Parse(`{{ percent . }} {{ bar . "[" "=" ">" " " "]" }}`))

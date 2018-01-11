@@ -34,7 +34,7 @@ func main() {
 }
 
 func parseTemplate(format string) *template.Template {
-	return template.Must(pgr.NewBarTemplate().Parse(format))
+	return template.Must(pgr.NewTemplate().Parse(format))
 }
 
 func incBy(p *pgr.Bar, d time.Duration) {
