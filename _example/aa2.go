@@ -7,16 +7,16 @@ import (
 	"context"
 	"math"
 	"strings"
-	"text/template"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/tyru/pgr"
 )
 
 func main() {
 	b1 := pgr.NewBarFunc(math.MaxInt64, dash())
 	b2 := pgr.NewBarFunc(math.MaxInt64, uwaaaa())
-	b3 := pgr.NewBar(math.MaxInt64, parseTemplate(`(b3) {{ current . }}/{{ total . }}`))
+	b3 := pgr.NewBarFunc(math.MaxInt64, pugya())
 	go incBy(b1, 30*time.Millisecond)
 	go incBy(b2, 20*time.Millisecond)
 	go incBy(b3, 40*time.Millisecond)
@@ -78,15 +78,24 @@ func dash() pgr.FormatFunc {
 
 func uwaaaa() pgr.FormatFunc {
 	start := 0
-	const b1 = "▂"
-	const b2 = "▅"
-	const b3 = "▇"
-	const b4 = "▇"
-	const b5 = "▓"
-	const b6 = "▒"
-	const b7 = "░"
+
+	// constants
+	cyan := color.New(color.FgCyan).SprintFunc()
+	magenta := color.New(color.FgMagenta).SprintFunc()
+	blue := color.New(color.FgBlue).SprintFunc()
+	yellow := color.New(color.FgYellow).SprintFunc()
+	green := color.New(color.FgGreen).SprintFunc()
+	red := color.New(color.FgRed).SprintFunc()
+	b1 := cyan("▂")
+	b2 := magenta("▅")
+	b3 := blue("▇")
+	b4 := yellow("▇")
+	b5 := green("▓")
+	b6 := red("▒")
+	b7 := "░"
 	wave := []string{b1, b2, b3, b4, b5, b6, b7, b6, b5, b4, b3, b2}
 	const face = " ('ω')"
+
 	return func(*pgr.Bar) string {
 		var buf bytes.Buffer
 
@@ -111,8 +120,38 @@ func uwaaaa() pgr.FormatFunc {
 	}
 }
 
-func parseTemplate(format string) *template.Template {
-	return template.Must(pgr.NewTemplate().Parse(format))
+func pugya() pgr.FormatFunc {
+	i := 0
+
+	// constants
+	cyan := color.New(color.FgCyan).SprintFunc()
+	magenta := color.New(color.FgMagenta).SprintFunc()
+	blue := color.New(color.FgBlue).SprintFunc()
+	yellow := color.New(color.FgYellow).SprintFunc()
+	green := color.New(color.FgGreen).SprintFunc()
+	red := color.New(color.FgRed).SprintFunc()
+	rainbow := []func(...interface{}) string{cyan, magenta, blue, yellow, green, red}
+	convert := func(s string, i int) string {
+		var buf bytes.Buffer
+		for j, c := range s {
+			buf.WriteString(rainbow[(i+j)%len(rainbow)](string(c)))
+		}
+		return buf.String()
+	}
+
+	return func(*pgr.Bar) string {
+		i++
+		switch i % 4 {
+		case 0:
+			return convert("ﾌﾟｷﾞｬｰｰｰｰｰｰｰm9(^Д^)9mｰｰｰｰｰｰｰｰ", i)
+		case 1:
+			return convert("ﾌﾟｷﾞｬｰｰｰｰｰｰm9(^Д^)9mｰｰｰｰｰｰｰｰｰ", i)
+		case 2:
+			return convert("ﾌﾟｷﾞｬｰｰｰｰｰｰｰm9(^Д^)9mｰｰｰｰｰｰｰｰ", i)
+		default:
+			return convert("ﾌﾟｷﾞｬｰｰｰｰｰｰｰｰm9(^Д^)9mｰｰｰｰｰｰｰ", i)
+		}
+	}
 }
 
 func incBy(p *pgr.Bar, d time.Duration) {
