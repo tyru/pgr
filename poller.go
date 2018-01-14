@@ -1,6 +1,7 @@
 package pgr
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"io"
@@ -113,12 +114,18 @@ func (p *Poller) drawLine(bar *Bar) error {
 		format = bar.finishFormat
 	}
 	if tmpl != nil {
-		if err := tmpl.Execute(p.out, bar); err != nil {
+		var buf bytes.Buffer
+		if err := tmpl.Execute(&buf, bar); err != nil {
+			return err
+		}
+		s := bytes.Replace(buf.Bytes(), []byte{byte('\n')}, []byte{}, -1)
+		if _, err := p.out.Write([]byte(s)); err != nil {
 			return err
 		}
 	} else if format != nil {
 		if s := format(bar); s != "" {
-			if _, err := p.out.Write([]byte(s)); err != nil {
+			buf := bytes.Replace([]byte(s), []byte{byte('\n')}, []byte{}, -1)
+			if _, err := p.out.Write(buf); err != nil {
 				return err
 			}
 		}
