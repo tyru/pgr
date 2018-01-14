@@ -11,21 +11,26 @@ import (
 type Bar struct {
 	// current must be first member of struct
 	// (https://code.google.com/p/go/issues/detail?id=5278)
-	current int64
-	total   int64
-	mu      sync.RWMutex
-	tmpl    *template.Template
-	format  FormatFunc
+	current  int64
+	total    int64
+	finished bool
+
+	mu sync.RWMutex
+
+	tmpl         *template.Template
+	format       FormatFunc
+	finishTmpl   *template.Template
+	finishFormat FormatFunc
 }
 
 type FormatFunc func(*Bar) string
 
 func NewBar(total int64, tmpl *template.Template) *Bar {
-	return &Bar{current: 0, total: total, tmpl: tmpl}
+	return &Bar{current: 0, total: total, tmpl: tmpl, finishTmpl: tmpl}
 }
 
 func NewBarFunc(total int64, format FormatFunc) *Bar {
-	return &Bar{current: 0, total: total, format: format}
+	return &Bar{current: 0, total: total, format: format, finishFormat: format}
 }
 
 // template MUST NOT print newline.
@@ -66,6 +71,20 @@ func (bar *Bar) Inc() {
 
 func (bar *Bar) Add(n int64) {
 	atomic.AddInt64(&bar.current, n)
+}
+
+func (bar *Bar) OnFinish(tmpl *template.Template) *Bar {
+	bar.mu.Lock()
+	defer bar.mu.Unlock()
+	bar.finishTmpl = tmpl
+	return bar
+}
+
+func (bar *Bar) OnFinishFunc(format FormatFunc) *Bar {
+	bar.mu.Lock()
+	defer bar.mu.Unlock()
+	bar.finishFormat = format
+	return bar
 }
 
 // template MUST NOT print newline.

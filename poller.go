@@ -62,6 +62,10 @@ func (p *Poller) Show(ctx context.Context) error {
 	for {
 		select {
 		case <-ctx.Done():
+			if lines > 0 {
+				termPrevLine(p.out, lines)
+			}
+			p.poll()
 			return ErrCanceled
 		case <-time.NewTimer(p.duration).C:
 			if lines > 0 {
@@ -87,16 +91,8 @@ func (p *Poller) poll() (lines int, err error) {
 
 	for _, bar := range p.bars {
 		termClearLine(p.out)
-		if bar.tmpl != nil {
-			if err := bar.tmpl.Execute(p.out, bar); err != nil {
-				return 0, err
-			}
-		} else /* if bar.format != nil */ {
-			if s := bar.format(bar); s != "" {
-				if _, err := p.out.Write([]byte(s)); err != nil {
-					return 0, err
-				}
-			}
+		if err := p.drawLine(bar); err != nil {
+			return 0, err
 		}
 		if _, err := p.out.Write([]byte{byte('\n')}); err != nil {
 			return 0, err
@@ -106,6 +102,28 @@ func (p *Poller) poll() (lines int, err error) {
 		}
 	}
 	return len(p.bars), err
+}
+
+func (p *Poller) drawLine(bar *Bar) error {
+	tmpl := bar.tmpl
+	format := bar.format
+	if bar.finished || bar.Current() >= bar.Total() {
+		bar.finished = true
+		tmpl = bar.finishTmpl
+		format = bar.finishFormat
+	}
+	if tmpl != nil {
+		if err := tmpl.Execute(p.out, bar); err != nil {
+			return err
+		}
+	} else /* if format != nil */ {
+		if s := format(bar); s != "" {
+			if _, err := p.out.Write([]byte(s)); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
 }
 
 func (p *Poller) SetDuration(d time.Duration) {

@@ -11,9 +11,12 @@ import (
 )
 
 func main() {
-	b1 := pgr.NewBar(100, parseTemplate(`(b1) {{ current . }}/{{ total . }} {{ bar . "[" "=" ">" " " "]" 70 }}`))
-	b2 := pgr.NewBar(200, parseTemplate(`(b2) {{ current . }}/{{ total . }} {{ bar . "[" "=" ">" " " "]" 70 }}`))
-	b3 := pgr.NewBar(300, parseTemplate(`(b3) {{ current . }}/{{ total . }} {{ bar . "[" "=" ">" " " "]" 70 }}`))
+	b1 := pgr.NewBar(100, parseTemplate(`(b1) {{ current . }}/{{ total . }} {{ bar . "[" "=" ">" " " "]" 70 }}`)).
+		OnFinish(parseTemplate(`(b1) {{ current . }}/{{ total . }} Finished!`))
+	b2 := pgr.NewBar(200, parseTemplate(`(b2) {{ current . }}/{{ total . }} {{ bar . "[" "=" ">" " " "]" 70 }}`)).
+		OnFinish(parseTemplate(`(b2) {{ current . }}/{{ total . }} Finished!`))
+	b3 := pgr.NewBar(300, parseTemplate(`(b3) {{ current . }}/{{ total . }} {{ bar . "[" "=" ">" " " "]" 70 }}`)).
+		OnFinish(parseTemplate(`(b3) {{ current . }}/{{ total . }} Finished!`))
 
 	poller := pgr.NewPoller(100 * time.Millisecond).Add(b1)
 
