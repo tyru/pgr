@@ -116,7 +116,7 @@ func (p *Poller) drawLine(bar *Bar) error {
 		if err := tmpl.Execute(p.out, bar); err != nil {
 			return err
 		}
-	} else /* if format != nil */ {
+	} else if format != nil {
 		if s := format(bar); s != "" {
 			if _, err := p.out.Write([]byte(s)); err != nil {
 				return err
