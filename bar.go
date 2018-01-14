@@ -81,12 +81,14 @@ func (bar *Bar) OnFinish(tmpl *template.Template) *Bar {
 	bar.mu.Lock()
 	defer bar.mu.Unlock()
 	bar.finishTmpl = tmpl
+	bar.finishFormat = nil
 	return bar
 }
 
 func (bar *Bar) OnFinishFunc(format FormatFunc) *Bar {
 	bar.mu.Lock()
 	defer bar.mu.Unlock()
+	bar.finishTmpl = nil
 	bar.finishFormat = format
 	return bar
 }
