@@ -6,56 +6,58 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
-	"strings"
 	"text/template"
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/mattn/go-runewidth"
 	"github.com/tyru/pgr"
 )
 
 func main() {
-	maxWidth := runewidth.StringWidth("ﾒｲｶｲｴｸﾘﾌﾟｽ")
-	b1 := makeBar("ﾋﾞﾑﾃｲｵｰ", "fgCyan", maxWidth)
-	b2 := makeBar("ｲｰﾏｸｽ", "fgYellow", maxWidth)
-	b3 := makeBar("ﾒｲｶｲｴｸﾘﾌﾟｽ", "fgRed", maxWidth)
-	b4 := makeBar("ｱﾄﾑｻﾞｺｰﾄﾞ", "fgBlue", maxWidth)
-	b5 := makeBar("ｻﾌﾞﾗｲﾑﾃｷｽﾄ", "fgGreen", maxWidth)
+	b1 := makeBar("b1", "fgCyan")
+	b2 := makeBar("b2", "fgYellow")
+	b3 := makeBar("b3", "fgRed")
+	b4 := makeBar("b4", "fgBlue")
+	b5 := makeBar("b5", "fgGreen")
 
-	poller := pgr.NewPoller(250 * time.Millisecond).
+	poller := pgr.NewPoller(300 * time.Millisecond).
 		Add(b1).
 		Add(b2).
 		Add(b3).
 		Add(b4).
 		Add(b5).
 		SetSorter(func(bars []*pgr.Bar, i, j int) bool {
-			return bars[i].Current() < bars[j].Current()
+			return bars[i].Current() >= bars[j].Current()
 		})
 
-	go randIncBy(b1, 500*time.Millisecond, 1)
-	go randIncBy(b2, 500*time.Millisecond, 2)
-	go randIncBy(b3, 500*time.Millisecond, 3)
-	go randIncBy(b4, 500*time.Millisecond, 4)
-	go randIncBy(b5, 500*time.Millisecond, 5)
+	now := time.Now().Unix()
+	go randIncBy(b1, 300*time.Millisecond, now+1)
+	go randIncBy(b2, 300*time.Millisecond, now+2)
+	go randIncBy(b3, 300*time.Millisecond, now+3)
+	go randIncBy(b4, 300*time.Millisecond, now+4)
+	go randIncBy(b5, 300*time.Millisecond, now+5)
 
 	poller.Show(context.Background())
 }
 
-func makeBar(name, color string, width int) *pgr.Bar {
+func makeBar(name, color string) *pgr.Bar {
 	prefix := fmt.Sprintf("({{ %s %q }})", color, name)
-	pad := strings.Repeat(" ", width-runewidth.StringWidth(name))
-	return pgr.NewBar(100, parseTemplate(prefix+pad+` {{ bar . "[" "=" ">" " " "]" 70 }}`)).
-		OnFinish(parseTemplate(prefix + pad + ` Goal!`))
+	funcMap := funcMap()
+	return pgr.NewBar(100, parseTemplate(funcMap, prefix+` {{ bar . "[" "=" ">" " " "]" 70 }}`)).
+		OnFinish(parseTemplate(funcMap, prefix+` Finished!`))
 }
 
-func parseTemplate(format string) *template.Template {
+func parseTemplate(funcMap template.FuncMap, format string) *template.Template {
+	return template.Must(pgr.NewTemplate().Funcs(funcMap).Parse(format))
+}
+
+func funcMap() template.FuncMap {
 	cyan := color.New(color.FgCyan).SprintFunc()
 	yellow := color.New(color.FgYellow).SprintFunc()
 	red := color.New(color.FgRed).SprintFunc()
 	blue := color.New(color.FgBlue).SprintFunc()
 	green := color.New(color.FgGreen).SprintFunc()
-	return template.Must(pgr.NewTemplate().Funcs(template.FuncMap{
+	return template.FuncMap{
 		"fgCyan": func(s string) string {
 			return cyan(s)
 		},
@@ -71,7 +73,7 @@ func parseTemplate(format string) *template.Template {
 		"fgGreen": func(s string) string {
 			return green(s)
 		},
-	}).Parse(format))
+	}
 }
 
 func randIncBy(p *pgr.Bar, d time.Duration, seed int64) {
