@@ -73,6 +73,10 @@ func (bar *Bar) Add(n int64) {
 	atomic.AddInt64(&bar.current, n)
 }
 
+func (bar *Bar) Finished() bool {
+	return bar.finished
+}
+
 func (bar *Bar) OnFinish(tmpl *template.Template) *Bar {
 	bar.mu.Lock()
 	defer bar.mu.Unlock()
