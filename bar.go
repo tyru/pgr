@@ -29,21 +29,21 @@ func NewBarFunc(total int64, format FormatFunc) *Bar {
 }
 
 // template MUST NOT print newline.
-func (p *Bar) SetTemplate(tmpl *template.Template) *Bar {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-	p.tmpl = tmpl
-	return p
+func (bar *Bar) SetTemplate(tmpl *template.Template) *Bar {
+	bar.mu.Lock()
+	defer bar.mu.Unlock()
+	bar.tmpl = tmpl
+	return bar
 }
 
-func (p *Bar) SetCurrent(current int64) *Bar {
-	atomic.StoreInt64(&p.current, current)
-	return p
+func (bar *Bar) SetCurrent(current int64) *Bar {
+	atomic.StoreInt64(&bar.current, current)
+	return bar
 }
 
-func (p *Bar) Current() int64 {
-	v := atomic.LoadInt64(&p.current)
-	total := p.Total()
+func (bar *Bar) Current() int64 {
+	v := atomic.LoadInt64(&bar.current)
+	total := bar.Total()
 	if v > total {
 		return total
 	}
@@ -51,21 +51,21 @@ func (p *Bar) Current() int64 {
 }
 
 // XXX: https://code.google.com/p/go/issues/detail?id=5278
-func (p *Bar) SetTotal(total int64) *Bar {
-	atomic.StoreInt64(&p.total, total)
-	return p
+func (bar *Bar) SetTotal(total int64) *Bar {
+	atomic.StoreInt64(&bar.total, total)
+	return bar
 }
 
-func (p *Bar) Total() int64 {
-	return atomic.LoadInt64(&p.total)
+func (bar *Bar) Total() int64 {
+	return atomic.LoadInt64(&bar.total)
 }
 
-func (p *Bar) Inc() {
-	p.Add(1)
+func (bar *Bar) Inc() {
+	bar.Add(1)
 }
 
-func (p *Bar) Add(n int64) {
-	atomic.AddInt64(&p.current, n)
+func (bar *Bar) Add(n int64) {
+	atomic.AddInt64(&bar.current, n)
 }
 
 // template MUST NOT print newline.
