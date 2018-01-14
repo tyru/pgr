@@ -6,21 +6,24 @@ import (
 	"context"
 	"fmt"
 	"math/rand"
+	"strings"
 	"text/template"
 	"time"
 
 	"github.com/fatih/color"
+	"github.com/mattn/go-runewidth"
 	"github.com/tyru/pgr"
 )
 
 func main() {
-	b1 := bar("b1", "fgCyan")
-	b2 := bar("b2", "fgYellow")
-	b3 := bar("b3", "fgRed")
-	b4 := bar("b4", "fgBlue")
-	b5 := bar("b5", "fgGreen")
+	maxWidth := runewidth.StringWidth("ﾒｲｶｲｴｸﾘﾌﾟｽ")
+	b1 := makeBar("ﾋﾞﾑﾃｲｵｰ", "fgCyan", maxWidth)
+	b2 := makeBar("ｲｰﾏｸｽ", "fgYellow", maxWidth)
+	b3 := makeBar("ﾒｲｶｲｴｸﾘﾌﾟｽ", "fgRed", maxWidth)
+	b4 := makeBar("ｱﾄﾑｻﾞｺｰﾄﾞ", "fgBlue", maxWidth)
+	b5 := makeBar("ｻﾌﾞﾗｲﾑﾃｷｽﾄ", "fgGreen", maxWidth)
 
-	poller := pgr.NewPoller(200 * time.Millisecond).
+	poller := pgr.NewPoller(250 * time.Millisecond).
 		Add(b1).
 		Add(b2).
 		Add(b3).
@@ -39,10 +42,11 @@ func main() {
 	poller.Show(context.Background())
 }
 
-func bar(name, color string) *pgr.Bar {
+func makeBar(name, color string, width int) *pgr.Bar {
 	prefix := fmt.Sprintf("({{ %s %q }})", color, name)
-	return pgr.NewBar(100, parseTemplate(prefix+` {{ current . }}/{{ total . }} {{ bar . "[" "=" ">" " " "]" 70 }}`)).
-		OnFinish(parseTemplate(prefix + ` {{ current . }}/{{ total . }} Finished!`))
+	pad := strings.Repeat(" ", width-runewidth.StringWidth(name))
+	return pgr.NewBar(100, parseTemplate(prefix+pad+` {{ bar . "[" "=" ">" " " "]" 70 }}`)).
+		OnFinish(parseTemplate(prefix + pad + ` Goal!`))
 }
 
 func parseTemplate(format string) *template.Template {
