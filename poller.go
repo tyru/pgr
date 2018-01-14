@@ -5,6 +5,7 @@ import (
 	"context"
 	"errors"
 	"io"
+	"sort"
 	"sync"
 	"time"
 
@@ -13,15 +14,26 @@ import (
 
 type Poller struct {
 	duration time.Duration
+	lessFunc LessFunc
 	bars     []*Bar
 
 	mu      sync.RWMutex
 	running bool
-	out     io.Writer
+
+	out io.Writer
 }
+
+type LessFunc func([]*Bar, int, int) bool
 
 func NewPoller(d time.Duration) *Poller {
 	return &Poller{duration: d, out: colorable.NewColorableStdout()}
+}
+
+func (p *Poller) SetSorter(less LessFunc) *Poller {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.lessFunc = less
+	return p
 }
 
 func (p *Poller) Add(bars ...*Bar) *Poller {
@@ -89,6 +101,12 @@ var errUnfinished = errors.New("not finished yet")
 func (p *Poller) poll() (lines int, err error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
+
+	if p.lessFunc != nil {
+		sort.Slice(p.bars, func(i, j int) bool {
+			return p.lessFunc(p.bars, i, j)
+		})
+	}
 
 	for _, bar := range p.bars {
 		termClearLine(p.out)
