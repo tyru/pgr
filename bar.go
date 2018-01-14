@@ -3,6 +3,7 @@ package pgr
 import (
 	"strconv"
 	"strings"
+	"sync"
 	"sync/atomic"
 	"text/template"
 )
@@ -12,6 +13,7 @@ type Bar struct {
 	// (https://code.google.com/p/go/issues/detail?id=5278)
 	current int64
 	total   int64
+	mu      sync.RWMutex
 	tmpl    *template.Template
 	format  FormatFunc
 }
@@ -28,6 +30,8 @@ func NewBarFunc(total int64, format FormatFunc) *Bar {
 
 // template MUST NOT print newline.
 func (p *Bar) SetTemplate(tmpl *template.Template) *Bar {
+	p.mu.Lock()
+	defer p.mu.Unlock()
 	p.tmpl = tmpl
 	return p
 }
