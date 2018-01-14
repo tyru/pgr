@@ -5,12 +5,8 @@ import (
 	"io"
 )
 
-func termSave(out io.Writer) {
-	fmt.Fprint(out, "\x1b7")
-}
-
-func termRestore(out io.Writer) {
-	fmt.Fprint(out, "\x1b8")
+func termPrevLine(out io.Writer, n int) {
+	fmt.Fprintf(out, "\x1b\x5b%dF", n)
 }
 
 func termClearLine(out io.Writer) {

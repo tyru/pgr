@@ -58,17 +58,21 @@ func (p *Poller) Show(ctx context.Context) error {
 		p.mu.Unlock()
 	}()
 
-	termSave(p.out)
+	lines := 0
 	for {
 		select {
 		case <-ctx.Done():
 			return ErrCanceled
 		case <-time.NewTimer(p.duration).C:
-			termRestore(p.out)
-			if err := p.poll(); err == nil {
+			if lines > 0 {
+				termPrevLine(p.out, lines)
+			}
+			if l, err := p.poll(); err == nil {
 				return nil
 			} else if err != errUnfinished {
 				return err
+			} else {
+				lines = l
 			}
 		}
 	}
@@ -77,7 +81,7 @@ func (p *Poller) Show(ctx context.Context) error {
 var errUnfinished = errors.New("not finished yet")
 
 // poll() returns nil error if all bars are finished.
-func (p *Poller) poll() (err error) {
+func (p *Poller) poll() (lines int, err error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
@@ -85,23 +89,23 @@ func (p *Poller) poll() (err error) {
 		termClearLine(p.out)
 		if bar.tmpl != nil {
 			if err := bar.tmpl.Execute(p.out, bar); err != nil {
-				return err
+				return 0, err
 			}
 		} else /* if bar.format != nil */ {
 			if s := bar.format(bar); s != "" {
 				if _, err := p.out.Write([]byte(s)); err != nil {
-					return err
+					return 0, err
 				}
 			}
 		}
 		if _, err := p.out.Write([]byte{byte('\n')}); err != nil {
-			return err
+			return 0, err
 		}
 		if bar.Current() < bar.Total() {
 			err = errUnfinished
 		}
 	}
-	return err
+	return len(p.bars), err
 }
 
 func (p *Poller) SetDuration(d time.Duration) {
