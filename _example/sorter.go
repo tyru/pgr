@@ -26,8 +26,8 @@ func main() {
 		Add(b3).
 		Add(b4).
 		Add(b5).
-		SetSorter(func(bars []*pgr.Bar, i, j int) bool {
-			return bars[i].Current() >= bars[j].Current()
+		SetSorter(func(a, b *pgr.Bar) bool {
+			return a.Current() >= b.Current()
 		})
 
 	now := time.Now().Unix()

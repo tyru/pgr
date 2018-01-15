@@ -23,7 +23,7 @@ type Poller struct {
 	out io.Writer
 }
 
-type LessFunc func([]*Bar, int, int) bool
+type LessFunc func(*Bar, *Bar) bool
 
 func NewPoller(d time.Duration) *Poller {
 	return &Poller{duration: d, out: colorable.NewColorableStdout()}
@@ -104,19 +104,19 @@ func (p *Poller) poll() (lines int, err error) {
 
 	if p.lessFunc != nil {
 		sort.Slice(p.bars, func(i, j int) bool {
-			return p.lessFunc(p.bars, i, j)
+			return p.lessFunc(p.bars[i], p.bars[j])
 		})
 	}
 
-	for _, bar := range p.bars {
+	for i := range p.bars {
 		termClearLine(p.out)
-		if err := p.drawLine(bar); err != nil {
+		if err := p.drawLine(p.bars[i]); err != nil {
 			return 0, err
 		}
 		if _, err := p.out.Write([]byte{byte('\n')}); err != nil {
 			return 0, err
 		}
-		if bar.Current() < bar.Total() {
+		if p.bars[i].Current() < p.bars[i].Total() {
 			err = errUnfinished
 		}
 	}
