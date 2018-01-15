@@ -85,13 +85,13 @@ func (p *Poller) Show(ctx context.Context) error {
 			if lines > 0 {
 				termPrevLine(p.out, lines)
 			}
-			p.poll()
+			p.Poll()
 			return ErrCanceled
 		case <-time.NewTimer(p.duration).C:
 			if lines > 0 {
 				termPrevLine(p.out, lines)
 			}
-			if l, err := p.poll(); err == nil {
+			if l, err := p.Poll(); err == nil {
 				return nil
 			} else if err != errUnfinished {
 				return err
@@ -105,7 +105,7 @@ func (p *Poller) Show(ctx context.Context) error {
 var errUnfinished = errors.New("not finished yet")
 
 // poll() returns nil error if all bars are finished.
-func (p *Poller) poll() (lines int, err error) {
+func (p *Poller) Poll() (lines int, err error) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 
