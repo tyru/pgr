@@ -33,14 +33,6 @@ func NewBarFunc(total int64, format FormatFunc) *Bar {
 	return &Bar{current: 0, total: total, format: format, finishFormat: format}
 }
 
-// template MUST NOT print newline.
-func (bar *Bar) SetTemplate(tmpl *template.Template) *Bar {
-	bar.mu.Lock()
-	defer bar.mu.Unlock()
-	bar.tmpl = tmpl
-	return bar
-}
-
 func (bar *Bar) SetCurrent(current int64) *Bar {
 	atomic.StoreInt64(&bar.current, current)
 	return bar
