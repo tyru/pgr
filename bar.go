@@ -13,7 +13,7 @@ type Bar struct {
 	// (https://code.google.com/p/go/issues/detail?id=5278)
 	current  int64
 	total    int64
-	finished bool
+	finished int32
 
 	mu sync.RWMutex
 
@@ -66,7 +66,8 @@ func (bar *Bar) Add(n int64) {
 }
 
 func (bar *Bar) Finished() bool {
-	return bar.finished
+	v := atomic.LoadInt32(&bar.finished)
+	return v != 0
 }
 
 func (bar *Bar) OnFinish(tmpl *template.Template) *Bar {

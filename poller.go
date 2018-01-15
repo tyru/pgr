@@ -126,8 +126,8 @@ func (p *Poller) poll() (lines int, err error) {
 func (p *Poller) drawLine(bar *Bar) error {
 	tmpl := bar.tmpl
 	format := bar.format
-	if bar.finished || bar.Current() >= bar.Total() {
-		bar.finished = true
+	if bar.finished != 0 || bar.Current() >= bar.Total() {
+		bar.finished = 1
 		tmpl = bar.finishTmpl
 		format = bar.finishFormat
 	}
