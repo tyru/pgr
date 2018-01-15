@@ -10,11 +10,8 @@ import (
 func main() {
 	bar := pgr.NewBarFunc(100, rikka())
 	poller := pgr.NewPoller(100 * time.Millisecond).Add(bar)
-	ctx, cancel := context.WithCancel(context.Background())
-	go func() {
-		time.Sleep(3 * time.Second)
-		cancel()
-	}()
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
 	poller.Show(ctx)
 }
 
