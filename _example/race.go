@@ -49,7 +49,7 @@ func makeBar(name, color string, width int) *pgr.Bar {
 	prefix := fmt.Sprintf("({{ %s %q }})", color, name)
 	pad := strings.Repeat(" ", width-runewidth.StringWidth(name))
 	funcMap := funcMap()
-	return pgr.NewBar(100, parseTemplate(funcMap, prefix+pad+` {{ bar . "[" "=" ">" " " "]" 70 }}`)).
+	return pgr.NewBar(100, parseTemplate(funcMap, prefix+pad+` {{ rbar . "[" " " "🏇" "_" "]" 70 }}`)).
 		OnFinishFunc(func(*pgr.Bar) string {
 			mu.Lock()
 			defer mu.Unlock()
