@@ -59,6 +59,13 @@ func (p *Poller) SetOut(out io.Writer) error {
 	return nil
 }
 
+func (p *Poller) SetDuration(d time.Duration) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	p.duration = d
+}
+
 var ErrCanceled = errors.New("canceled by context")
 
 func (p *Poller) Show(ctx context.Context) error {
@@ -149,11 +156,4 @@ func (p *Poller) drawLine(bar *Bar) error {
 		}
 	}
 	return nil
-}
-
-func (p *Poller) SetDuration(d time.Duration) {
-	p.mu.Lock()
-	defer p.mu.Unlock()
-
-	p.duration = d
 }

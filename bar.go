@@ -86,38 +86,12 @@ func (bar *Bar) OnFinishFunc(format FormatFunc) *Bar {
 	return bar
 }
 
+// `{{ percent . }} {{ bar . "[" "=" ">" " " "]" }}`
+var DefaultTemplate = template.Must(NewTemplate().Parse(`{{ percent . }} {{ bar . "[" "=" ">" " " "]" }}`))
+
 // template MUST NOT print newline.
 func NewTemplate() *template.Template {
 	return template.New("pgr.Poller").Funcs(funcMaps)
-}
-
-func showBar(bar *Bar, prefix, complete, current, incomplete, suffix string, col int, reversed bool) string {
-	ccWidth := col - len(prefix+current+suffix)
-	if ccWidth <= 0 {
-		return "" // no space
-	}
-
-	// len(complete) = n, len(uncomplete) = m
-	//
-	//   n : n + m = bar.Current() : bar.Total()
-	//   (n + m) * bar.Current() = n * bar.Total()
-	//
-	// col - len(prefix+current+suffix) = ccWidth
-	// ccWidth = n + m
-	//
-	//   ccWidth * bar.Current() = n * bar.Total()
-	//   n = ccWidth * bar.Current() / bar.Total()
-
-	n := int(float64(ccWidth) * float64(bar.Current()) / float64(bar.Total()))
-	m := ccWidth - n
-	if reversed {
-		n, m = m, n
-	}
-	return prefix +
-		strings.Repeat(complete, n) +
-		current +
-		strings.Repeat(incomplete, m) +
-		suffix
 }
 
 var funcMaps = template.FuncMap{
@@ -162,5 +136,31 @@ var funcMaps = template.FuncMap{
 	},
 }
 
-// `{{ percent . }} {{ bar . "[" "=" ">" " " "]" }}`
-var DefaultTemplate = template.Must(NewTemplate().Parse(`{{ percent . }} {{ bar . "[" "=" ">" " " "]" }}`))
+func showBar(bar *Bar, prefix, complete, current, incomplete, suffix string, col int, reversed bool) string {
+	ccWidth := col - len(prefix+current+suffix)
+	if ccWidth <= 0 {
+		return "" // no space
+	}
+
+	// len(complete) = n, len(uncomplete) = m
+	//
+	//   n : n + m = bar.Current() : bar.Total()
+	//   (n + m) * bar.Current() = n * bar.Total()
+	//
+	// col - len(prefix+current+suffix) = ccWidth
+	// ccWidth = n + m
+	//
+	//   ccWidth * bar.Current() = n * bar.Total()
+	//   n = ccWidth * bar.Current() / bar.Total()
+
+	n := int(float64(ccWidth) * float64(bar.Current()) / float64(bar.Total()))
+	m := ccWidth - n
+	if reversed {
+		n, m = m, n
+	}
+	return prefix +
+		strings.Repeat(complete, n) +
+		current +
+		strings.Repeat(incomplete, m) +
+		suffix
+}
