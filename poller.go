@@ -103,7 +103,7 @@ func (p *Poller) poll() (lines int, err error) {
 	defer p.mu.Unlock()
 
 	if p.lessFunc != nil {
-		sort.Slice(p.bars, func(i, j int) bool {
+		sort.SliceStable(p.bars, func(i, j int) bool {
 			return p.lessFunc(p.bars[i], p.bars[j])
 		})
 	}
